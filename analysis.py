@@ -55,7 +55,7 @@ def plot(mean_matrix, standard_deviation_matrix):
     plt.close()
 
 
-if mod is "-a":
+if mod == "-a":
     dirs_csv = []
     for _ in dirs:
         if ('csv' in _) and ('data' in _):
@@ -113,19 +113,21 @@ if mod is "-a":
     standard_deviation_matrix = pd.DataFrame(np.array(ret['standard_deviation']).reshape(11, -1), index=index,
                                              columns=cols)
     plot(mean_matrix, standard_deviation_matrix)
-elif mod is "-b":
+elif mod == "-b":
     mean_matrix = None
     standard_deviation_matrix = None
     ret = None
     dirs_csv = []
     for _ in dirs:
-        file_name, file_type = os.path.split(_)
-        if file_type is '':
+        file_name, file_type = os.path.splitext(_)
+        if file_type == '':
             tmp = path + _ + '/' + 'result.csv'
             print(tmp)
             dirs_csv.append(tmp)
             pass
         pass
+    if not dirs_csv:
+        exit()
     for _ in dirs_csv:
         data = pd.read_csv(_,
                            sep=',',
@@ -135,14 +137,21 @@ elif mod is "-b":
         if ret is None:
             ret = data
         else:
-            ret = ret + data
+            ret['mean'] = ret['mean'] + data['mean']
+            ret['standard_deviation'] = ret['standard_deviation'] + data['standard_deviation']
             pass
         pass
 
-    ret = ret / len(dirs_csv)
+    ret['mean'] = ret['mean'] / len(dirs_csv)
+    ret['standard_deviation'] = ret['standard_deviation'] / len(dirs_csv)
+    ret = pd.DataFrame(ret, dtype='double')
+    print(ret)
     ret.to_csv(path + 'result' + '.csv', sep=',', index=False)
-    mean_matrix = np.array(ret['mean']).reshape(11, -1)
-    standard_deviation_matrix = np.array(ret['standard_deviation']).reshape(11, -1)
+    cols = ret['permeability'].unique()
+    index = ret['traffic_density'].unique()
+    mean_matrix = pd.DataFrame(np.array(ret['mean']).reshape(11, -1), index=index, columns=cols)
+    standard_deviation_matrix = pd.DataFrame(np.array(ret['standard_deviation']).reshape(11, -1), index=index,
+                                             columns=cols)
     plot(mean_matrix, standard_deviation_matrix)
 else:
     exit()
