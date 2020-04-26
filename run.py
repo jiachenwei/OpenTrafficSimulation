@@ -24,12 +24,11 @@ if __name__ == '__main__':
     if not os.path.exists("./output/"):
         os.makedirs("./output/")
         pass
-<<<<<<< HEAD
 
     path = "./output/data_%s" % time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     tmp_path = path
     count = 1
-    
+
     while os.path.exists(tmp_path):
         tmp_path = path + '_' + str(count)
         count += 1
@@ -37,9 +36,6 @@ if __name__ == '__main__':
 
     path = tmp_path + '/'
     os.makedirs(path)
-=======
-    path = "./output/data_%s/" % time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
->>>>>>> bfd758c28a53935547c84584e90890c9b7646b5f
     task(path)
     os.system("""python analysis.py -a "%s" """ % path)
     pass
