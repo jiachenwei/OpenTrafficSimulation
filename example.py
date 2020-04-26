@@ -66,8 +66,9 @@ def std_task(traffic_density: float, dir_path: str):
               car_color=(1, 0, 0),
               road_length=road_length)
 
-    IDC = Car(car_name='SDC',
-              car_type=DICT_CAR_TYPE["SDC"],
+    # IDC
+    IDC = Car(car_name='IDC',
+              car_type=DICT_CAR_TYPE["IDC"],
               following_model=DICT_FOLLOWING_MODEL["PATH_CACC"],
               car_size=CAR_SIZE,
               expecting_headway=2,
@@ -146,6 +147,7 @@ def std_task(traffic_density: float, dir_path: str):
         # np.save(file_name, dump)
 
         data = np.array(dump['v'][dump['time'] > SAMPLING_TIME]) * 3.6
+        data[data > MAX_SPEED] = MAX_SPEED
         mean = np.mean(data)
         x = np.linspace(0, MAX_SPEED, int(MAX_SPEED / 10) + 1)
         y, _ = np.histogram(data, bins=x)
