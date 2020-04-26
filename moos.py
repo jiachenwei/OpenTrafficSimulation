@@ -422,10 +422,25 @@ class IDMModel(FollowingModel):
 class PATHModelACC(FollowingModel):
     """TODO:核心函数"""
 
+    def __init__(self, k1=0.23, k2=0.07):
+        self.k1 = k1
+        self.k2 = k2
+
     def _run(self,
              following_car: Car,
              preceding_car: Car) -> float:
-        return 0
+        e = (
+                following_car.real_spacing
+                * np.random.normal(1, following_car.observation_error)
+                - following_car.stopping_distance
+                - following_car.expecting_headway
+                * following_car.real_speed
+        )
+        _a = (self.k1 * e
+              + self.k2
+              * following_car.real_speed_difference
+              * np.random.normal(1, following_car.observation_error))
+        return _a
 
     pass
 
