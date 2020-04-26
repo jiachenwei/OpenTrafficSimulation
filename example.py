@@ -56,7 +56,7 @@ def std_task(traffic_density: float, dir_path: str):
               car_type=DICT_CAR_TYPE["SDC"],
               following_model=DICT_FOLLOWING_MODEL["PATH_ACC"],
               car_size=CAR_SIZE,
-              expecting_headway=2,
+              expecting_headway=3,
               limiting_acceleration=LIMITING_ACCELERATION,
               limiting_speed=LIMITING_SPEED,
               stopping_distance=1,
