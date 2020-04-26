@@ -66,8 +66,9 @@ def std_task(traffic_density: float, dir_path: str):
               car_color=(1, 0, 0),
               road_length=road_length)
 
-    IDC = Car(car_name='SDC',
-              car_type=DICT_CAR_TYPE["SDC"],
+    # IDC
+    IDC = Car(car_name='IDC',
+              car_type=DICT_CAR_TYPE["IDC"],
               following_model=DICT_FOLLOWING_MODEL["PATH_CACC"],
               car_size=CAR_SIZE,
               expecting_headway=2,
