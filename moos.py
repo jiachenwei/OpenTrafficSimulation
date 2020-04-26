@@ -12,47 +12,68 @@ class FollowingModel(metaclass=abc.ABCMeta):
     跟驰模型接口类
     """
 
-    def __call__(self,
-                 following_car,
-                 preceding_car):
-        return self._run(following_car,
-                         preceding_car)
+    def __call__(self, following_car):
+        return self._run(following_car)
 
     @abc.abstractmethod
-    def _run(self,
-             following_car,
-             preceding_car) -> float:
+    def _run(self, following_car) -> float:
         """
         跟驰模型接口类虚函数，必须重载。
         跟驰模型计算入口
         :param following_car: 跟驰车实例类，类型为Car
-        :param preceding_car: 被跟驰车实例类，类型为Car
         :return: 返回加速度，浮点类型
         """
 
     pass
 
 
-class Car:
+class CarInfo:
+    def __init__(self):
+        self.name = str()
+        self.id = None
+        self.car_type = None
+        self.following_model = FollowingModel
+        self.init_location = float()
+        self.init_speed = float()
+        self.init_acceleration = float()
+        self.expecting_headway = float()
+        self.car_size = [float(), float()]  # [length, width]
+        self.limiting_acceleration = [float(), float()]
+        self.limiting_speed = [float(), float()]
+        self.stopping_distance = float()
+        self.observation_error = float()
+        self.operation_error = float()
+        self.response_time_delay = float()
+        self.car_color = [float(), float(), float()]
+
+        self.real_mileage = 0
+        self.real_location = self.init_location
+        self.real_speed = self.init_speed
+        self.real_acceleration = float()
+
+        self.real_headway = float()
+        self.real_spacing = float()
+        self.real_speed_difference = float()
+        self.real_acceleration_difference = float()
+
+        self.preceding_car = self
+        self.following_car = self
+
+        self.road_length = float()
+
+        self.time = 0
+        self.real_position = 0
+
+
+class Car(CarInfo):
     """
     基础车类
     """
 
-    def __init__(self,
-                 car_name: str,
-                 car_type: int,
-                 following_model: FollowingModel,
-                 expecting_headway: float,
-                 limiting_acceleration: [float, float],
-                 limiting_speed: [float, float],
-                 stopping_distance: float,
-                 observation_error: float,
-                 operation_error: float,
-                 response_time_delay: float,
-                 car_color: [float, float, float],
-                 car_size: [float, float],
-                 road_length: float
-                 ):
+    def __init__(self, car_name: str, car_type: int, following_model: FollowingModel, expecting_headway: float,
+                 limiting_acceleration: [float, float], limiting_speed: [float, float], stopping_distance: float,
+                 observation_error: float, operation_error: float, response_time_delay: float,
+                 car_color: [float, float, float], car_size: [float, float]):
         """
         构造函数
         初始化所有静态数据
@@ -67,14 +88,13 @@ class Car:
         :param response_time_delay: 反应延迟，float类型，指一秒中的有效响应比例，范围[0,1]
         :param car_color: 车辆颜色，list类型，例如[0.5, 0.5, 0.5],rbg颜色，颜色范围[0,1]
         :param car_size: 车辆尺寸，list类型，例如[长度，宽度]，参考捷达尺寸[4.5,1.7]，单位m
-        :param road_length: 道路长度，float类型，单位m
         """
+        super().__init__()
         self.name = car_name
         self.id = hash(time.time())
         time.sleep(0.001)
         self.car_type = car_type
         self.following_model = following_model
-        self.second_following_model = AidedGippsModel()
         self.init_location = float()
         self.init_speed = float()
         self.init_acceleration = float()
@@ -98,12 +118,13 @@ class Car:
         self.real_speed_difference = float()
         self.real_acceleration_difference = float()
 
-        self.preceding_car = None
+        self.preceding_car = self
+        self.following_car = self
 
         self.is_linked = False
         self.is_initialized = False
 
-        self.road_length = road_length
+        self.road_length = float()
 
         self.time = 0
         self._time = self.time
@@ -120,7 +141,6 @@ class Car:
         self._real_speed_difference = float()
         self._real_acceleration_difference = float()
         self._response_time_delay = np.random.random() * self.response_time_delay
-        pass
 
     def __call__(self):
         self.id = hash(time.time())
@@ -129,9 +149,48 @@ class Car:
     def __repr__(self):
         return self.name
 
-    def initialize(self, loc: float, speed: float, acceleration: float):
+    def get_info(self):
+        ret = CarInfo()
+        ret.name = self.name
+        ret.id = self.id
+        ret.car_type = self.car_type
+        ret.following_model = self.following_model
+        ret.init_location = self.init_location
+        ret.init_speed = self.init_speed
+        ret.init_acceleration = self.init_acceleration
+        ret.expecting_headway = self.expecting_headway
+        ret.car_size = self.car_size
+        ret.limiting_acceleration = self.limiting_acceleration
+        ret.limiting_speed = self.limiting_speed
+        ret.stopping_distance = self.stopping_distance
+        ret.observation_error = self.observation_error
+        ret.operation_error = self.operation_error
+        ret.response_time_delay = self.response_time_delay
+        ret.car_color = self.car_color
+
+        ret.real_mileage = self.real_mileage
+        ret.real_location = self.real_location
+        ret.real_speed = self.real_speed
+        ret.real_acceleration = self.real_acceleration
+
+        ret.real_headway = self.real_headway
+        ret.real_spacing = self.real_spacing
+        ret.real_speed_difference = self.real_speed_difference
+        ret.real_acceleration_difference = self.real_acceleration_difference
+
+        ret.preceding_car = self.preceding_car
+        ret.following_car = self.following_car
+
+        ret.road_length = self.road_length
+
+        ret.time = self.time
+        ret.real_position = self.real_position
+        return ret
+
+    def initialize(self, loc: float, speed: float, acceleration: float, road_length: float):
         """
         动态变量初始化函数
+        :param road_length:
         :param loc: 位置，float类型，单位m
         :param speed: 速度，float类型，单位m/s
         :param acceleration: 加速度，float类型，单位m/s**2
@@ -144,7 +203,9 @@ class Car:
         self.real_speed = speed
         self.init_acceleration = acceleration
         self.real_acceleration = acceleration
+        self.road_length = road_length
         self.is_initialized = True
+        pass
 
     def count_difference(self, location_correction: float):
         """
@@ -191,50 +252,30 @@ class Car:
         )
         pass
 
-    def link(self, preceding_car):
+    def link(self, following_car, preceding_car):
         """
         链接函数，链接跟驰车与前车
+        :param following_car:
         :param preceding_car: 前车实例
         :return:
         """
+        self.following_car = following_car
         self.preceding_car = preceding_car
         self.is_linked = True
 
-    def update(self, step: float, use_second_following_model=True):
+    def update(self, step: float):
         """
         更新动态数据，此方法仅作为更新准备，并不会赋值
-        :param use_second_following_model: 是否需要启用第二跟驰模型辅助驾驶
         :param step: 步长,float类型
         :return: 无
         """
-        if use_second_following_model:
-            if self._response_time_delay > 0:
-                self._response_time_delay -= 0.001
-                _a = self._real_acceleration
-            else:
-                self._response_time_delay = self.response_time_delay
-                _a2 = self.second_following_model(self, self.preceding_car)
-                if _a2 <= 0:
-                    _a = _a2
-                else:
-                    _a1 = self.following_model(self, self.preceding_car)
-                    if _a2 < _a1:
-                        _a = _a2
-                    else:
-                        _a = _a1
-                        pass
-                    pass
-                _a = self._check_acceleration(_a) * np.random.normal(1, self.operation_error)
-            pass
+        if self._response_time_delay > 0:
+            self._response_time_delay -= 0.001
+            _a = self._real_acceleration
         else:
-            if self._response_time_delay > 0:
-                self._response_time_delay -= 0.001
-                _a = self._real_acceleration
-            else:
-                self._response_time_delay = self.response_time_delay
-                _a = self.following_model(self, self.preceding_car)
-                _a = self._check_acceleration(_a) * np.random.normal(1, self.operation_error)
-                pass
+            self._response_time_delay = self.response_time_delay
+            _a = self.following_model(self)
+            _a = self._check_acceleration(_a) * np.random.normal(1, self.operation_error)
             pass
 
         _a = self._check_acceleration(_a)
@@ -273,6 +314,9 @@ class Car:
     def switch_following_model(self, following_model: FollowingModel):
         self.following_model = following_model
 
+    def get_difference(self):
+        return np.array([self.real_spacing, self.real_speed_difference, self.real_acceleration_difference])
+
     def _check_acceleration(self, acceleration: float) -> float:
         if (self.real_speed <= self.limiting_speed[0] and acceleration < 0) \
                 or \
@@ -299,14 +343,10 @@ class Car:
 
 
 class FVDModel(FollowingModel):
-    """TODO:核心函数"""
-
     def __init__(self):
         pass
 
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
+    def _run(self, following_car: Car) -> float:
         b = 28
         alpha = 0.16
         beta = 1.1
@@ -326,11 +366,7 @@ class FVDModel(FollowingModel):
 
 
 class GippsModel(FollowingModel):
-    """TODO:核心函数"""
-
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
+    def _run(self, following_car: Car) -> float:
         e = ((following_car.limiting_acceleration[0] * following_car.response_time_delay) ** 2
              - following_car.limiting_acceleration[0]
              * (2 * (following_car.real_spacing
@@ -339,9 +375,9 @@ class GippsModel(FollowingModel):
                 # - following_car.expecting_headway
                 # * following_car.limiting_speed[1])
                 - following_car.real_speed * following_car.response_time_delay
-                - (preceding_car.real_speed
+                - (following_car.preceding_car.real_speed
                    * np.random.normal(1, following_car.observation_error)) ** 2
-                / preceding_car.limiting_acceleration[0]))
+                / following_car.preceding_car.limiting_acceleration[0]))
         if e < 0:
             e = 0
             pass
@@ -359,18 +395,16 @@ class GippsModel(FollowingModel):
 
 
 class AidedGippsModel(FollowingModel):
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
+    def _run(self, following_car: Car) -> float:
         e = ((following_car.limiting_acceleration[0] * following_car.response_time_delay) ** 2
              - following_car.limiting_acceleration[0]
              * (2 * (following_car.real_spacing
                      * np.random.normal(1, following_car.observation_error)
                      - following_car.stopping_distance)
                 - following_car.real_speed * following_car.response_time_delay
-                - (preceding_car.real_speed
+                - (following_car.preceding_car.real_speed
                    * np.random.normal(1, following_car.observation_error)) ** 2
-                / preceding_car.limiting_acceleration[0]))
+                / following_car.preceding_car.limiting_acceleration[0]))
         if e < 0:
             e = 0
             pass
@@ -382,14 +416,10 @@ class AidedGippsModel(FollowingModel):
 
 
 class IDMModel(FollowingModel):
-    """TODO:核心函数"""
-
     def __init__(self, beta=4):
         self.beta = beta
 
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
+    def _run(self, following_car: Car) -> float:
 
         exp_spacing = (
                 following_car.stopping_distance
@@ -420,15 +450,11 @@ class IDMModel(FollowingModel):
 
 
 class PATHModelACC(FollowingModel):
-    """TODO:核心函数"""
-
     def __init__(self, k1=0.23, k2=0.07):
         self.k1 = k1
         self.k2 = k2
 
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
+    def _run(self, following_car: Car) -> float:
         e = (
                 following_car.real_spacing
                 * np.random.normal(1, following_car.observation_error)
@@ -446,16 +472,12 @@ class PATHModelACC(FollowingModel):
 
 
 class PATHModelCACC(FollowingModel):
-    """TODO:核心函数"""
-
     def __init__(self, k1=1.1, k2=0.23, k3=0.07):
         self.k1 = k1
         self.k2 = k2
         self.k3 = k3
 
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
+    def _run(self, following_car: Car) -> float:
         e = (
                 following_car.real_spacing
                 * np.random.normal(1, following_car.observation_error)
@@ -464,7 +486,7 @@ class PATHModelCACC(FollowingModel):
                 * following_car.real_speed
         )
         _a = (self.k1
-              * preceding_car.real_acceleration
+              * following_car.preceding_car.real_acceleration
               * np.random.normal(1, following_car.observation_error)
               + self.k2 * e
               + self.k3
@@ -475,13 +497,177 @@ class PATHModelCACC(FollowingModel):
     pass
 
 
-class IntelligentDrivingCarModel(FollowingModel):
-    def _run(self,
-             following_car: Car,
-             preceding_car: Car) -> float:
-        return 0
+class IDMWithGipps(FollowingModel):
+    def __init__(self, beta=4):
+        self.beta = beta
+        self.idm = IDMModel(beta)
+        self.gipps = GippsModel()
 
-    pass
+    def _run(self, following_car) -> float:
+        re = 0
+        a1 = self.idm(following_car)
+        a2 = self.gipps(following_car)
+        t = np.min((0, a1, a2))
+        if t == 0:
+            re = a1
+        elif t != 0:
+            re = t
+        else:
+            pass
+        return re
+
+
+class PATHModelACCWithGipps(FollowingModel):
+    def __init__(self, k1=0.23, k2=0.07):
+        self.k1 = k1
+        self.k2 = k2
+        self.path_acc = PATHModelACC(k1, k2)
+        self.gipps = GippsModel()
+
+    def _run(self, following_car) -> float:
+        re = 0
+        a1 = self.path_acc(following_car)
+        a2 = self.gipps(following_car)
+        t = np.min((0, a1, a2))
+        if t == 0:
+            re = a1
+        elif t != 0:
+            re = t
+        else:
+            pass
+        return re
+
+
+class PATHModelCACCWithGipps(FollowingModel):
+    def __init__(self, k1=1.1, k2=0.23, k3=0.07):
+        self.k1 = k1
+        self.k2 = k2
+        self.k3 = k3
+        self.path_cacc = PATHModelCACC(k1, k2, k3)
+        self.gipps = GippsModel()
+
+    def _run(self, following_car) -> float:
+        re = 0
+        a1 = self.path_cacc(following_car)
+        a2 = self.gipps(following_car)
+        t = np.min((0, a1, a2))
+        if t == 0:
+            re = a1
+        elif t != 0:
+            re = t
+        else:
+            pass
+        return re
+
+
+class IntelligentDrivingCarModel(FollowingModel):
+    """TODO"""
+    dict_mode = {0: 'head', 1: 'body', 2: 'tail'}
+
+    def __init__(self, model: FollowingModel, beta: float, name='IDC', max_search_index=5):
+        self.model = model
+        self.name = name
+        self.beta = beta
+        self.max_search_index = max_search_index
+        pass
+
+    def _run(self, following_car: Car) -> float:
+
+        _following_car = following_car.get_info()
+        a = 0
+
+        if following_car.following_car.following_model != self:
+            # head
+            cars = []
+            tmp_car = following_car
+            for i in range(self.max_search_index+1):
+                cars.append(tmp_car)
+                tmp_car = tmp_car.preceding_car
+                pass
+
+            head = []
+            body = []
+            tail = []
+
+            tag = 2
+            for c in cars[:-1]:
+                if tag == 2 and type(c.preceding_car.following_model) == type(self):
+                    t = c.get_difference()
+                    tail.append(t+np.sum(tail,0))
+                    continue
+                elif tag == 2 and type(c.preceding_car.following_model) != type(self):
+                    tag = 1
+                    t = c.get_difference()
+                    body.append(t+np.sum(tail,0))
+                    continue
+                elif tag == 1 and type(c.preceding_car.following_model) != type(self):
+                    t = c.get_difference()
+                    body.append(t+np.sum(tail,0)+np.sum(body,0))
+                    continue
+                elif tag == 1 and type(c.preceding_car.following_model) == type(self):
+                    tag = 0
+                    t = c.get_difference()
+                    head.append(t+np.sum(tail,0)+np.sum(body,0))
+                    continue
+                else:
+                    pass
+                pass
+
+            if len(body) == 0 or len(head) == 0:
+                # print('A')
+                a = self.model(_following_car)
+                pass
+            elif len(tail) != 0:
+                # print('B')
+                vector_last_tail = tail[0]
+                vector_mean_body = np.mean(body, 0)
+                vector_last_head = head[0]
+                dx = np.max((
+                    vector_last_tail[0]
+                    + self.beta
+                    * np.min((0, vector_last_tail[1], vector_mean_body[1], vector_last_head[1]))
+                    , 0
+                ))
+                dv = vector_last_tail[1] + self.beta * np.min(
+                    (0, vector_last_tail[2], vector_mean_body[2], vector_last_head[2])
+                )
+                da = np.min((vector_last_tail[2], vector_mean_body[2], vector_last_head[2]))
+                _following_car.real_spacing = dx
+                _following_car.real_speed_difference = dv
+                _following_car.real_acceleration_difference = da
+                a = self.model(_following_car)
+                pass
+            elif len(tail) == 0:
+                # print('C')
+                vector_last_tail = body[0]
+                vector_mean_body = np.mean(body, 0)
+                vector_last_head = head[0]
+                dx = np.max((
+                    vector_last_tail[0]
+                    + self.beta
+                    * np.min((0, vector_last_tail[1], vector_mean_body[1], vector_last_head[1]))
+                    , 0
+                ))
+                dv = vector_last_tail[1] + self.beta * np.min(
+                    (0, vector_last_tail[2], vector_mean_body[2], vector_last_head[2])
+                )
+                da = np.min((vector_last_tail[2], vector_mean_body[2], vector_last_head[2]))
+                _following_car.real_spacing = dx
+                _following_car.real_speed_difference = dv
+                _following_car.real_acceleration_difference = da
+                a = self.model(_following_car)
+                pass
+            else:
+                # print('D')
+                pass
+            pass
+        elif _following_car.following_car.following_model == self:
+            # tail
+            a = self.model(_following_car)
+            pass
+        else:
+            pass
+        return a
 
 
 SET_INIT_LOC_TYPE = {"L", "U", "R"}
@@ -560,21 +746,23 @@ class Fleet:
     def _make_cars_link(self):
         index = len(self.cars)
         for x in range(index - 1):
-            self.cars[x].link(self.cars[x + 1])
+            self.cars[x].link(self.cars[x - 1], self.cars[x + 1])
             pass
-        self.cars[-1].link(self.cars[0])
+        self.cars[-1].link(self.cars[-2], self.cars[0])
         pass
 
     def _init_loc(self) -> None:
         if self.init_type_loc is "L":
             num = len(self.cars)
+            self.cars[0].initialize(0, 0, 0, self.road_length)
             for _i in range(1, num):
                 self.cars[_i].initialize(
                     self.cars[_i - 1].init_location
                     + self.cars[_i - 1].stopping_distance
                     + self.cars[_i].car_size[0],
                     0,
-                    0
+                    0,
+                    self.road_length
                 )
                 pass
             pass
@@ -582,7 +770,7 @@ class Fleet:
             num = len(self.cars)
             loc = np.linspace(0, self.road_length, num)
             for cl, car in zip(loc, self.cars):
-                car.initialize(cl, 0, 0)
+                car.initialize(cl, 0, 0, self.road_length)
                 pass
             pass
         elif self.init_type_loc is "R":
