@@ -21,6 +21,9 @@ def task(dir_path: str):
 
 
 if __name__ == '__main__':
+    if not os.path.exists("./output/"):
+        os.makedirs("./output/")
+        pass
     path = "./output/data_%s/" % time.strftime("%Y_%m_%d_%H_%M_%S", time.localtime())
     task(path)
     os.system("""python analysis.py -a "%s" """ % path)
