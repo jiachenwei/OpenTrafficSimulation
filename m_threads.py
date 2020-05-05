@@ -1,4 +1,3 @@
-import sys
 from example import *
 
 mod = sys.argv[1]
