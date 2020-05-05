@@ -2,10 +2,10 @@ from example import *
 
 
 def task(dir_path: str):
-    os.system("start python m_threads.py -1 '%s'" % dir_path)
-    os.system("start python m_threads.py -2 '%s'" % dir_path)
-    os.system("start python m_threads.py -3 '%s'" % dir_path)
-    os.system("start python m_threads.py -4 '%s'" % dir_path)
+    os.system("start python m_threads.py -1 %s" % dir_path)
+    os.system("start python m_threads.py -2 %s" % dir_path)
+    os.system("start python m_threads.py -3 %s" % dir_path)
+    os.system("start python m_threads.py -4 %s" % dir_path)
 
 
 if __name__ == '__main__':
@@ -25,5 +25,5 @@ if __name__ == '__main__':
     path = tmp_path + '/'
     os.makedirs(path)
     task(path)
-    os.system("""python analysis.py -a "%s" """ % path)
+    # os.system("""python analysis.py -a "%s" """ % path)
     pass
