@@ -3,6 +3,9 @@ from task import *
 mod = sys.argv[1]
 path = sys.argv[2]
 
+proportions = std_hdc_idc_cacc_proportions
+traffic_densities = std_traffic_densities
+
 if mod == '-1':
     std_task(proportions, traffic_densities, path)
 elif mod == '-21':

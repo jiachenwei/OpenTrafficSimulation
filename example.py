@@ -148,6 +148,3 @@ std_hdc_idc_cacc_proportions = [{HDC: 1.00, IDC_CACC: 0.00},
                                 {HDC: 0.00, IDC_CACC: 1.00}]
 
 std_traffic_densities = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
-
-proportions = std_hdc_idc_acc_proportions
-traffic_densities = std_traffic_densities

@@ -478,14 +478,13 @@ class PATHModelCACCWithGipps(FollowingModel):
             re = t
         else:
             pass
-        print(re)
         return re
 
 
 class IntelligentDrivingCarModel(FollowingModel):
     dict_mode = {0: 'head', 1: 'body', 2: 'tail'}
 
-    def __init__(self, model: FollowingModel, alpha: float = 0.5, beta: float = 0.5, gamma: float = 1, name='IDC',
+    def __init__(self, model: FollowingModel, alpha: float = 0.5, beta: float = 1, gamma: float = 1, name='IDC',
                  max_search_index=5):
         self.model = model
         self.name = name
@@ -536,10 +535,9 @@ class IntelligentDrivingCarModel(FollowingModel):
             pass
 
         if len(body) == 0 or len(head) == 0:
-            # print('A')
             a = self.model(_following_car)
             pass
-        elif type(_following_car.following_car.following_model) != type(self):
+        elif type(_following_car.following_car.following_model) is not type(self):
             # head
             if len(tail) != 0:
                 vector_pre_car = tail[0]
@@ -562,29 +560,28 @@ class IntelligentDrivingCarModel(FollowingModel):
             _following_car.real_acceleration_difference = da
             a = self.model(_following_car)
             pass
-        elif type(_following_car.following_car.following_model) != type(self):
+        elif type(_following_car.following_car.following_model) is type(self):
             # tail
-            # if len(tail) != 0:
-            #     vector_pre_car = tail[0]
-            # else:
-            #     vector_pre_car = body[0]
-            # vector_mean_body = np.mean(body, 0)
-            # vector_head = []
-            # t = _following_car.expecting_headway
-            # t = t - self.alpha * t * np.tanh(self.beta * (np.max(0,
-            #                                                      vector_pre_car[1],
-            #                                                      vector_mean_body[1],
-            #                                                      vector_head[1])
-            #                                               + self.gamma
-            #                                               * np.max(0,
-            #                                                        vector_pre_car[2],
-            #                                                        vector_mean_body[2],
-            #                                                        vector_head[2])))
-            # _following_car.expecting_headway = t
+            if len(tail) != 0:
+                vector_pre_car = tail[0]
+            else:
+                vector_pre_car = body[0]
+            vector_mean_body = np.mean(body, 0)
+            vector_head = head[0]
+            t = _following_car.expecting_headway
+            t = t - self.alpha * t * np.tanh(self.beta * (np.max((vector_pre_car[1],
+                                                                 vector_mean_body[1],
+                                                                 vector_head[1]))
+                                                          + self.gamma
+                                                          * np.max((vector_pre_car[2],
+                                                                   vector_mean_body[2],
+                                                                   vector_head[2]))))
+            _following_car.expecting_headway = t
             a = self.model(_following_car)
             pass
         else:
-            pass
+            print("ERROR")
+            exit()
         return a
 
 
