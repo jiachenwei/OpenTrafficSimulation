@@ -15,4 +15,5 @@ elif mod == '-3':
 elif mod == '-4':
     std_task(std_hdc_idc_proportions[5:], std_traffic_densities[5:], path)
 else:
+    print("Fail")
     pass
