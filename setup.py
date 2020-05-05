@@ -2,11 +2,11 @@ from setuptools import setup
 
 setup(
     name='traffic_simulation_lit',
-    version='',
-    packages=[''],
+    version='gamma',
+    packages=[""],
     url='',
-    license='',
-    author='Freddy',
-    author_email='',
+    license='GPL',
+    author='Jia Chenwei',
+    author_email='cwjia98@163.com',
     description=''
 )

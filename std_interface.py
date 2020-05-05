@@ -55,7 +55,7 @@ class CarInfo(metaclass=abc.ABCMeta):
         self.preceding_car = self  # 指定前车，若无特殊需要，自动生成
         self.following_car = self  # 指定后车，若无特殊需要，自动生成
 
-        self.road_length = float()  # 道路长度，单位m，应该制定车流密度，与仿真车辆数，则自动生成道路长度
+        self.road_length = float()  # 道路长度，单位m，应该tell车流密度，与仿真车辆数，则自动生成道路长度
 
         self.time = 0  # 模拟时间，自动生成，不可赋值
         self.real_position = 0  # 真实道路位置，单位m

@@ -1,9 +1,7 @@
-import abc
 import copy
 import time
 from typing import List, Dict
 
-import numpy as np
 import pandas as pd
 
 from std_interface import *
@@ -338,27 +336,6 @@ class GippsModel(FollowingModel):
     pass
 
 
-class AidedGippsModel(FollowingModel):
-    def _run(self, following_car: Car) -> float:
-        e = ((following_car.limiting_acceleration[0] * following_car.response_time_delay) ** 2
-             - following_car.limiting_acceleration[0]
-             * (2 * (following_car.real_spacing
-                     * np.random.normal(1, following_car.observation_error)
-                     - following_car.stopping_distance)
-                - following_car.real_speed * following_car.response_time_delay
-                - (following_car.preceding_car.real_speed
-                   * np.random.normal(1, following_car.observation_error)) ** 2
-                / following_car.preceding_car.limiting_acceleration[0]))
-        if e < 0:
-            e = 0
-            pass
-        v = (following_car.limiting_acceleration[0] * following_car.response_time_delay + e ** 0.5)
-        _a = (v - following_car.real_speed) / following_car.response_time_delay
-        return _a
-
-    pass
-
-
 class IDMModel(FollowingModel):
     def __init__(self, beta=4):
         self.beta = beta
@@ -501,17 +478,20 @@ class PATHModelCACCWithGipps(FollowingModel):
             re = t
         else:
             pass
+        print(re)
         return re
 
 
 class IntelligentDrivingCarModel(FollowingModel):
-    """TODO"""
     dict_mode = {0: 'head', 1: 'body', 2: 'tail'}
 
-    def __init__(self, model: FollowingModel, beta: float, name='IDC', max_search_index=5):
+    def __init__(self, model: FollowingModel, alpha: float = 0.5, beta: float = 0.5, gamma: float = 1, name='IDC',
+                 max_search_index=5):
         self.model = model
         self.name = name
+        self.alpha = alpha
         self.beta = beta
+        self.gamma = gamma
         self.max_search_index = max_search_index
         pass
 
@@ -520,93 +500,87 @@ class IntelligentDrivingCarModel(FollowingModel):
         _following_car = following_car.get_info()
         a = 0
 
-        if following_car.following_car.following_model != self:
-            # head
-            cars = []
-            tmp_car = following_car
-            for i in range(self.max_search_index + 1):
-                cars.append(tmp_car)
-                tmp_car = tmp_car.preceding_car
-                pass
+        cars = []
+        tmp_car = following_car
+        for i in range(self.max_search_index + 1):
+            cars.append(tmp_car)
+            tmp_car = tmp_car.preceding_car
+            pass
 
-            head = []
-            body = []
-            tail = []
+        head = []
+        body = []
+        tail = []
 
-            tag = 2
-            for c in cars[:-1]:
-                if tag == 2 and type(c.preceding_car.following_model) == type(self):
-                    t = c.get_difference()
-                    tail.append(t + np.sum(tail, 0))
-                    continue
-                elif tag == 2 and type(c.preceding_car.following_model) != type(self):
-                    tag = 1
-                    t = c.get_difference()
-                    body.append(t + np.sum(tail, 0))
-                    continue
-                elif tag == 1 and type(c.preceding_car.following_model) != type(self):
-                    t = c.get_difference()
-                    body.append(t + np.sum(tail, 0) + np.sum(body, 0))
-                    continue
-                elif tag == 1 and type(c.preceding_car.following_model) == type(self):
-                    tag = 0
-                    t = c.get_difference()
-                    head.append(t + np.sum(tail, 0) + np.sum(body, 0))
-                    continue
-                else:
-                    pass
-                pass
-
-            if len(body) == 0 or len(head) == 0:
-                # print('A')
-                a = self.model(_following_car)
-                pass
-            elif len(tail) != 0:
-                # print('B')
-                vector_last_tail = tail[0]
-                vector_mean_body = np.mean(body, 0)
-                vector_last_head = head[0]
-                dx = np.max((
-                    vector_last_tail[0]
-                    + self.beta
-                    * np.min((0, vector_last_tail[1], vector_mean_body[1], vector_last_head[1]))
-                    , 0
-                ))
-                dv = vector_last_tail[1] + self.beta * np.min(
-                    (0, vector_last_tail[2], vector_mean_body[2], vector_last_head[2])
-                )
-                da = np.min((vector_last_tail[2], vector_mean_body[2], vector_last_head[2]))
-                _following_car.real_spacing = dx
-                _following_car.real_speed_difference = dv
-                _following_car.real_acceleration_difference = da
-                a = self.model(_following_car)
-                pass
-            elif len(tail) == 0:
-                # print('C')
-                vector_last_tail = body[0]
-                vector_mean_body = np.mean(body, 0)
-                vector_last_head = head[0]
-                dx = np.max((
-                    vector_last_tail[0]
-                    + self.beta
-                    * np.min((0, vector_last_tail[1], vector_mean_body[1], vector_last_head[1]))
-                    , 0
-                ))
-                dv = vector_last_tail[1] + self.beta * np.min(
-                    (0, vector_last_tail[2], vector_mean_body[2], vector_last_head[2])
-                )
-                da = np.min((vector_last_tail[2], vector_mean_body[2], vector_last_head[2]))
-                _following_car.real_spacing = dx
-                _following_car.real_speed_difference = dv
-                _following_car.real_acceleration_difference = da
-                a = self.model(_following_car)
-                pass
+        tag = 2
+        for c in cars[:-1]:
+            if tag == 2 and type(c.preceding_car.following_model) == type(self):
+                t = c.get_difference()
+                tail.append(t + np.sum(tail, 0))
+                continue
+            elif tag == 2 and type(c.preceding_car.following_model) != type(self):
+                tag = 1
+                t = c.get_difference()
+                body.append(t + np.sum(tail, 0))
+                continue
+            elif tag == 1 and type(c.preceding_car.following_model) != type(self):
+                t = c.get_difference()
+                body.append(t + np.sum(tail, 0) + np.sum(body, 0))
+                continue
+            elif tag == 1 and type(c.preceding_car.following_model) == type(self):
+                tag = 0
+                t = c.get_difference()
+                head.append(t + np.sum(tail, 0) + np.sum(body, 0))
+                continue
             else:
-                # print('D')
                 pass
             pass
-        elif _following_car.following_car.following_model == self:
+
+        if len(body) == 0 or len(head) == 0:
+            # print('A')
+            a = self.model(_following_car)
+            pass
+        elif type(_following_car.following_car.following_model) != type(self):
+            # head
+            if len(tail) != 0:
+                vector_pre_car = tail[0]
+            else:
+                vector_pre_car = body[0]
+            vector_mean_body = np.mean(body, 0)
+            vector_head = head[0]
+            dx = np.max((
+                vector_pre_car[0]
+                + self.gamma
+                * np.min((0, vector_pre_car[1], vector_mean_body[1], vector_head[1]))
+                , 0
+            ))
+            dv = vector_pre_car[1] + self.gamma * np.min(
+                (0, vector_pre_car[2], vector_mean_body[2], vector_head[2])
+            )
+            da = np.min((vector_pre_car[2], vector_mean_body[2], vector_head[2]))
+            _following_car.real_spacing = dx
+            _following_car.real_speed_difference = dv
+            _following_car.real_acceleration_difference = da
+            a = self.model(_following_car)
+            pass
+        elif type(_following_car.following_car.following_model) != type(self):
             # tail
+            # if len(tail) != 0:
+            #     vector_pre_car = tail[0]
+            # else:
+            #     vector_pre_car = body[0]
+            # vector_mean_body = np.mean(body, 0)
+            # vector_head = []
+            # t = _following_car.expecting_headway
+            # t = t - self.alpha * t * np.tanh(self.beta * (np.max(0,
+            #                                                      vector_pre_car[1],
+            #                                                      vector_mean_body[1],
+            #                                                      vector_head[1])
+            #                                               + self.gamma
+            #                                               * np.max(0,
+            #                                                        vector_pre_car[2],
+            #                                                        vector_mean_body[2],
+            #                                                        vector_head[2])))
+            # _following_car.expecting_headway = t
             a = self.model(_following_car)
             pass
         else:

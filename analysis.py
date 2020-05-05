@@ -2,7 +2,13 @@ import re
 
 import seaborn as sns
 
+import sys
+
 from example import *
+
+from matplotlib import pyplot as plt
+
+import os
 
 from pprint import pprint as pp
 

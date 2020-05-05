@@ -1,4 +1,6 @@
 from example import *
+from usr_example import *
+import os
 
 
 def task(dir_path: str, cpu_core_num: int = 4):
@@ -31,5 +33,4 @@ if __name__ == '__main__':
     path = tmp_path + '/'
     os.makedirs(path)
     task(path)
-    # os.system("""python analysis.py -one "%s" """ % path)
     pass
