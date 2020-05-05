@@ -6,63 +6,7 @@ from typing import List, Dict
 import numpy as np
 import pandas as pd
 
-
-class FollowingModel(metaclass=abc.ABCMeta):
-    """
-    跟驰模型接口类
-    """
-
-    def __call__(self, following_car):
-        return self._run(following_car)
-
-    @abc.abstractmethod
-    def _run(self, following_car) -> float:
-        """
-        跟驰模型接口类虚函数，必须重载。
-        跟驰模型计算入口
-        :param following_car: 跟驰车实例类，类型为Car
-        :return: 返回加速度，浮点类型
-        """
-
-    pass
-
-
-class CarInfo:
-    def __init__(self):
-        self.name = str()
-        self.id = None
-        self.car_type = None
-        self.following_model = FollowingModel
-        self.init_location = float()
-        self.init_speed = float()
-        self.init_acceleration = float()
-        self.expecting_headway = float()
-        self.car_size = [float(), float()]  # [length, width]
-        self.limiting_acceleration = [float(), float()]
-        self.limiting_speed = [float(), float()]
-        self.stopping_distance = float()
-        self.observation_error = float()
-        self.operation_error = float()
-        self.response_time_delay = float()
-        self.car_color = [float(), float(), float()]
-
-        self.real_mileage = 0
-        self.real_location = self.init_location
-        self.real_speed = self.init_speed
-        self.real_acceleration = float()
-
-        self.real_headway = float()
-        self.real_spacing = float()
-        self.real_speed_difference = float()
-        self.real_acceleration_difference = float()
-
-        self.preceding_car = self
-        self.following_car = self
-
-        self.road_length = float()
-
-        self.time = 0
-        self.real_position = 0
+from std_interface import *
 
 
 class Car(CarInfo):
@@ -580,7 +524,7 @@ class IntelligentDrivingCarModel(FollowingModel):
             # head
             cars = []
             tmp_car = following_car
-            for i in range(self.max_search_index+1):
+            for i in range(self.max_search_index + 1):
                 cars.append(tmp_car)
                 tmp_car = tmp_car.preceding_car
                 pass
@@ -593,21 +537,21 @@ class IntelligentDrivingCarModel(FollowingModel):
             for c in cars[:-1]:
                 if tag == 2 and type(c.preceding_car.following_model) == type(self):
                     t = c.get_difference()
-                    tail.append(t+np.sum(tail,0))
+                    tail.append(t + np.sum(tail, 0))
                     continue
                 elif tag == 2 and type(c.preceding_car.following_model) != type(self):
                     tag = 1
                     t = c.get_difference()
-                    body.append(t+np.sum(tail,0))
+                    body.append(t + np.sum(tail, 0))
                     continue
                 elif tag == 1 and type(c.preceding_car.following_model) != type(self):
                     t = c.get_difference()
-                    body.append(t+np.sum(tail,0)+np.sum(body,0))
+                    body.append(t + np.sum(tail, 0) + np.sum(body, 0))
                     continue
                 elif tag == 1 and type(c.preceding_car.following_model) == type(self):
                     tag = 0
                     t = c.get_difference()
-                    head.append(t+np.sum(tail,0)+np.sum(body,0))
+                    head.append(t + np.sum(tail, 0) + np.sum(body, 0))
                     continue
                 else:
                     pass

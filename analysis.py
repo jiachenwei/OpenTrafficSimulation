@@ -55,7 +55,7 @@ def plot(mean_matrix, standard_deviation_matrix):
     plt.close()
 
 
-if mod == "-a":
+if mod == "-one":
     dirs_csv = []
     for _ in dirs:
         if ('csv' in _) and ('data' in _):
@@ -113,7 +113,7 @@ if mod == "-a":
     standard_deviation_matrix = pd.DataFrame(np.array(ret['standard_deviation']).reshape(11, -1), index=index,
                                              columns=cols)
     plot(mean_matrix, standard_deviation_matrix)
-elif mod == "-b":
+elif mod == "-summary":
     mean_matrix = None
     standard_deviation_matrix = None
     ret = None
@@ -153,5 +153,7 @@ elif mod == "-b":
     standard_deviation_matrix = pd.DataFrame(np.array(ret['standard_deviation']).reshape(11, -1), index=index,
                                              columns=cols)
     plot(mean_matrix, standard_deviation_matrix)
+elif mod == '-vf':
+    pass
 else:
     exit()

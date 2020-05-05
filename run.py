@@ -1,11 +1,17 @@
 from example import *
 
 
-def task(dir_path: str):
-    os.system("start python m_threads.py -1 '%s'" % dir_path)
-    os.system("start python m_threads.py -2 '%s'" % dir_path)
-    os.system("start python m_threads.py -3 '%s'" % dir_path)
-    os.system("start python m_threads.py -4 '%s'" % dir_path)
+def task(dir_path: str, cpu_core_num: int = 4):
+    if cpu_core_num == 1:
+        os.system("start python m_threads.py -1 %s" % dir_path)
+    elif cpu_core_num == 2:
+        os.system("start python m_threads.py -21 %s" % dir_path)
+        os.system("start python m_threads.py -22 %s" % dir_path)
+    elif cpu_core_num == 4:
+        os.system("start python m_threads.py -41 %s" % dir_path)
+        os.system("start python m_threads.py -42 %s" % dir_path)
+        os.system("start python m_threads.py -43 %s" % dir_path)
+        os.system("start python m_threads.py -44 %s" % dir_path)
 
 
 if __name__ == '__main__':
@@ -25,5 +31,5 @@ if __name__ == '__main__':
     path = tmp_path + '/'
     os.makedirs(path)
     task(path)
-    os.system("""python analysis.py -a "%s" """ % path)
+    # os.system("""python analysis.py -one "%s" """ % path)
     pass
