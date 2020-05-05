@@ -34,13 +34,13 @@ class CarInfo(metaclass=abc.ABCMeta):
         self.init_acceleration = float()  # 初始加速度，自动生成，不可赋值
         self.expecting_headway = float()  # 期望车头时距，单位s
         self.car_size = [float(), float()]  # 车辆尺寸[length, width]，单位m
-        self.limiting_acceleration = [float(), float()]  # 限制加速度[减速度（负值），加速度]，单位m/s
-        self.limiting_speed = [float(), float()]  # 限制速度[最小速度，最大速度]，单位m/s**2
+        self.limiting_acceleration = [float(), float()]  # 限制加速度[减速度（负值），加速度]，单位m/s**2
+        self.limiting_speed = [float(), float()]  # 限制速度[最小速度，最大速度]，单位m/s
         self.stopping_distance = float()  # 停车间距/安全间距，单位m
         self.observation_error = float()  # 观测误差
         self.operation_error = float()  # 操作误差
         self.response_time_delay = float()  # 响应延迟
-        self.car_color = [float(), float(), float()]  # 车辆颜色OpenCVRGB色彩[]
+        self.car_color = [float(), float(), float()]  # 车辆颜色OpenCVRGB色彩
 
         self.real_mileage = 0  # 真实里程，单位m
         self.real_location = self.init_location  # 真实位置，单位m

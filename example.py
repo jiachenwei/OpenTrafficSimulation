@@ -29,7 +29,7 @@ DICT_FOLLOWING_MODEL = dict(FVD=FVDModel(),
                             IDM_WITH_GIPPS=IDMWithGipps(),
                             PATH_ACC_WITH_GIPPS=PATHModelACCWithGipps(),
                             PATH_CACC_WITH_GIPPS=PATHModelCACCWithGipps(),
-                            IDCM=IntelligentDrivingCarModel(PATHModelCACCWithGipps(), 1))
+                            IDCM=IntelligentDrivingCarModel(PATHModelACCWithGipps(), 1))
 
 DICT_CAR_TYPE = {
     "TEST": 00,
@@ -51,9 +51,23 @@ HDC = Car(car_name='HDC',
           response_time_delay=0.67,
           car_color=(1, 0, 0))
 
-SDC = Car(car_name='SDC',
+SDC_CACC = Car(car_name='SDC',
           car_type=DICT_CAR_TYPE["SDC"],
           following_model=DICT_FOLLOWING_MODEL["PATH_CACC_WITH_GIPPS"],
+          car_size=CAR_SIZE,
+          expecting_headway=2,
+          limiting_acceleration=LIMITING_ACCELERATION,
+          limiting_speed=LIMITING_SPEED,
+          stopping_distance=1,
+          observation_error=0.005,
+          operation_error=0.005,
+          response_time_delay=0.02,
+          car_color=(1, 0, 0))
+
+
+SDC_ACC = Car(car_name='SDC',
+          car_type=DICT_CAR_TYPE["SDC"],
+          following_model=DICT_FOLLOWING_MODEL["PATH_ACC_WITH_GIPPS"],
           car_size=CAR_SIZE,
           expecting_headway=3,
           limiting_acceleration=LIMITING_ACCELERATION,
@@ -65,11 +79,24 @@ SDC = Car(car_name='SDC',
           car_color=(1, 0, 0))
 
 # IDC
-IDC = Car(car_name='IDC',
+IDC_CACC = Car(car_name='IDC',
           car_type=DICT_CAR_TYPE["IDC"],
           following_model=DICT_FOLLOWING_MODEL["IDCM"],
           car_size=CAR_SIZE,
           expecting_headway=2,
+          limiting_acceleration=LIMITING_ACCELERATION,
+          limiting_speed=LIMITING_SPEED,
+          stopping_distance=1,
+          observation_error=0.005,
+          operation_error=0.005,
+          response_time_delay=0.02,
+          car_color=(1, 0, 0))
+
+IDC = Car(car_name='IDC',
+          car_type=DICT_CAR_TYPE["IDC"],
+          following_model=DICT_FOLLOWING_MODEL["IDCM"],
+          car_size=CAR_SIZE,
+          expecting_headway=3,
           limiting_acceleration=LIMITING_ACCELERATION,
           limiting_speed=LIMITING_SPEED,
           stopping_distance=1,
