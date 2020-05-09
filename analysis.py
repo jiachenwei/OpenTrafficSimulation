@@ -119,6 +119,11 @@ if mod == "-one":
     standard_deviation_matrix = pd.DataFrame(np.array(ret['standard_deviation']).reshape(11, -1), index=index,
                                              columns=cols)
     plot(mean_matrix, standard_deviation_matrix)
+elif mod == "-multi":
+    for _ in dirs:
+        if '.' not in _ and _[:4] == 'data':
+            print(path+_)
+            os.system("python analysis.py -one %s" % (path+_))
 elif mod == "-summary":
     mean_matrix = None
     standard_deviation_matrix = None
@@ -159,7 +164,5 @@ elif mod == "-summary":
     standard_deviation_matrix = pd.DataFrame(np.array(ret['standard_deviation']).reshape(11, -1), index=index,
                                              columns=cols)
     plot(mean_matrix, standard_deviation_matrix)
-elif mod == '-vf':
-    pass
 else:
     exit()
