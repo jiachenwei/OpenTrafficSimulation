@@ -224,30 +224,41 @@ class LaneVis(object):
 
 
 if __name__ == '__main__':
+    import pandas as pd
     import time
 
-    th = np.array(range(0, 360, 18))
-    cv2.namedWindow("Test", cv2.WINDOW_KEEPRATIO)
-    vis = Visualization()
-    st = 0
-    et = 0
-    dt = 0
-    wt = 1
-    for i in range(0, 60000):
-        st = time.time()
-        img = vis.refresh(th)
-        th = th + 1
-        cv2.imshow("Test", img)
-        et = time.time()
-        dt = (et - st) * 1000
-        wt = int(66 - (et - st) * 1000)
-        print(wt)
+    car_num = 50
+    td = 30
+    pe = 0.4
+    rl = 1000 * 50 / td
+    radius = rl / (2 * np.pi)
+    # cv2.namedWindow("Test", cv2.WINDOW_KEEPRATIO)
 
-        if wt < 1:
-            wt = 1
-        else:
-            pass
+    title = "Max of Velocity:{v:.2f}km/h\nNumber of Vehicles:{nv}\nTraffic Density:{l:.2f}\nPermeability:{p:.2f}". \
+        format(nv=car_num,
+               v=120,
+               p=pe,
+               l=td)
 
-        if cv2.waitKey(wt) == 27:
-            break
+    vis = Visualization(car_size=(13, 5), width=12, title=title)
+    # vis = Visualization(car_size=(10, 3), width=9, title=title)
+
+    data = pd.read_csv("data_TD_30.00_PE_0.40.csv",header=0, index_col=0, low_memory=False)
+
+    vehicle_type = np.array((data.iloc[0 * car_num: (0 + 1) * car_num]).loc[:, ['type']]).T[0] != 10
+
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('data_TD_30.00_PE_0.40.csv.avi', fourcc, 10.0, (640, 640))
+
+    for i in range(int(len(data)/car_num)):
+        theta = np.array((data.iloc[i*car_num: (i+1)*car_num]).loc[:, ['pos']] / radius).T[0] * 180 / np.pi
+        img = vis.refresh(theta, vehicle_type)
+        # cv2.imshow("Test", img)
+        img = img * 255
+        img = np.int8(img)
+        out.write(img)
+        # if cv2.waitKey(1) == 27:
+        #     break
+
+    out.release()
     cv2.destroyAllWindows()

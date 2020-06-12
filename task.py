@@ -128,7 +128,7 @@ def std_task(proportions: list, traffic_densities: list, dir_path: str):
 
 
 if __name__ == '__main__':
-    y = std_task_scene({HDC: 0.7, IDC_CACC: 0.3}, 20, 'output/test3/')
+    y = std_task_scene({HDC: 0.6, IDC_CACC: 0.4}, 35, 'output/data_test3/')
     while True:
         try:
             ti, td, pe, ty, ret = next(y)
